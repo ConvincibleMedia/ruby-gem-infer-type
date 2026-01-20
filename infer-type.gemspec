@@ -20,9 +20,9 @@ Gem::Specification.new do |spec|
 	
 
 	# Development dependencies
-	spec.add_development_dependency "bundler", "~> 1.17.3"
-	spec.add_development_dependency "pry", "~> 0.14.1"
-	spec.add_development_dependency "pry-byebug", "~> 3.4.0"
-	spec.add_development_dependency "rspec", "~> 3.11.0"
+	spec.add_development_dependency "bundler", "~> 1.17", ">= 1.17.3"
+	spec.add_development_dependency "pry", "~> 0.14", ">= 0.14.1"
+	spec.add_development_dependency "pry-byebug", "~> 3.4", ">= 3.4.0"
+	spec.add_development_dependency "rspec", "~> 3.11", ">= 3.11.0"
 end
 
