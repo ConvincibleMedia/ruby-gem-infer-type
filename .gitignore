@@ -1,0 +1,21 @@
+# Essential
+.git
+.env
+
+# Windows
+*.lnk
+*.db
+*.ini
+
+# Temp/cache/logs
+*.log
+*.map
+*/tmp
+*/cache
+
+# Working files/dirs
+.bundle
+pkg
+tmp
+spec/reports
+.vscode
