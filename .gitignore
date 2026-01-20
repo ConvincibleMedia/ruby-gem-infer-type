@@ -19,3 +19,6 @@ pkg
 tmp
 spec/reports
 .vscode
+
+# Gems
+Gemfile.lock
