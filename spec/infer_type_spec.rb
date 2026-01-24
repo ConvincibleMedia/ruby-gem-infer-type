@@ -72,6 +72,25 @@ RSpec.describe InferType do
 
 			expect { described_class.parse("123", Integer) }.to raise_error(TypeError, /Parser returned a type other than the type it detects/)
 		end
+
+		context "when STRIP is false" do
+			before do
+				stub_const("InferType::STRIP", false)
+			end
+
+			it "does not strip whitespace before parsing" do
+				input = " 42 "
+
+				result = described_class.parse(input)
+
+				expect(result).to equal(input)
+				expect(result).to eq(" 42 ")
+			end
+
+			it "passes unstripped strings to parsers" do
+				expect(described_class.parse(" TRUE ")).to eq(" TRUE ")
+			end
+		end
 	end
 end
 

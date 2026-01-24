@@ -5,10 +5,10 @@ require_relative "infer_type/parser"
 require_relative "infer_type/registry"
 
 module InferType
-	class << self
+	# Whether to strip input strings before parsing
+	STRIP = true
 
-		# Whether to strip input strings before parsing
-		STRIP = true
+	class << self
 
 		# Primary method to parse a string into a type
 		def parse(_input, *allowed_types)
@@ -16,7 +16,7 @@ module InferType
 
 			# Prepare the string
 			str = _input.dup
-			str = str.strip if STRIP
+			str = str.strip if InferType::STRIP
 
 			# Empty input immediately returned
 			return _input if str.empty?
