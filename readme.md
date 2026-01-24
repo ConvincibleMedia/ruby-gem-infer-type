@@ -38,6 +38,8 @@ InferType comes with default parsers. It will detect, in order:
 
 You can define your own class inheriting from `InferType::Parser` to detect other types -- see Custom Parsers below.
 
+Parsers for Hashes and Arrays represented as strings are also available built in, but not enabled by default. To enable them, you have to explicitly register them first with `InferType.register(InferType::Parsers::HashParser)` or `ArrayParser`.
+
 
 ## Restricting Types
 
@@ -122,6 +124,22 @@ CASE_SENSITIVE = false
 # If timezone offset is missing from a Time string, assume UTC
 # If false, the system's local timezone will be used
 DEFAULT_UTC = true
+```
+
+### Hash and Array
+
+`HashParser` and `ArrayParser` aren't enabled by default. If you enable them, they both accept the same configuration:
+
+```ruby
+# The types that are allowed to appear in keys/values of Hashes and Arrays.
+# You are only allowed to specify the types shown in the default list, plus Hash and Array.
+ALLOWED_TYPES = [String, Integer, Float, TrueClass, FalseClass, NilClass]
+# Hashes/arrays can be nested X levels deep (1 means no nesting, <=0 means unlimited)
+# If MAX_DEPTH >= 2 the next level will never be reached unless Hash/Array are also added to ALLOWED_TYPES
+MAX_DEPTH = 2
+# If true, a string representing a Hash must begin/end with { } and a string representing an Array must begin/end with [ ]
+# If false, strings that don't begin/end with these gain them first before type inference is attempted
+REQUIRES_BRACKETS = true
 ```
 
 ## Custom Parsers
