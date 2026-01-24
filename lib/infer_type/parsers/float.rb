@@ -18,13 +18,10 @@ module InferType
 			FLOAT_WITH_EXP_REGEX = /\A[+-]?(?:\d+(?:\.\d*)?|\.\d+)[eE][+-]?\d+\z/
 
 			def parse(str)
-				candidate = str.strip
-				return failure if candidate.empty?
-
 				# Check for exact special value string
-				if ["NaN", "Infinity", "-Infinity"].include?(candidate)
+				if ["NaN", "Infinity", "-Infinity"].include?(str)
 					if ALLOW_SPECIAL_VALUES
-						return success(Float(candidate))
+						return success(Float(str))
 					else
 						return failure
 					end
@@ -32,7 +29,7 @@ module InferType
 
 				# Check for integer if allowed
 				if ALLOW_INTEGER
-					InferType::Parsers::IntegerParser.new.parse(candidate).tap do |result|
+					InferType::Parsers::IntegerParser.new.parse(str).tap do |result|
 						if result.parsed
 							# Return it as a float
 							return success(result.value.to_f)
@@ -41,15 +38,15 @@ module InferType
 				end
 
 				# Check for float format
-				looks_float_no_exp = !candidate.match(FLOAT_NO_EXP_REGEX).nil?
-				looks_float_with_exp = ALLOW_EXPONENTIAL && !candidate.match(FLOAT_WITH_EXP_REGEX).nil?
+				looks_float_no_exp = !str.match(FLOAT_NO_EXP_REGEX).nil?
+				looks_float_with_exp = ALLOW_EXPONENTIAL && !str.match(FLOAT_WITH_EXP_REGEX).nil?
 				looks_float = looks_float_no_exp || looks_float_with_exp
 
 				return failure unless looks_float
 
 				# Attempt conversion
 				begin
-					value = Float(candidate)
+					value = Float(str)
 				rescue ArgumentError
 					return failure
 				end

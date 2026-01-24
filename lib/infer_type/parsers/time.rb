@@ -41,11 +41,8 @@ module InferType
 			>x.freeze
 
 			def parse(str)
-				candidate = str.strip
-				return failure if candidate.empty?
-				
 				# Looks like a Time
-				return failure unless match = candidate.match(TIME_FORMAT)
+				return failure unless match = str.match(TIME_FORMAT)
 				
 				# Pre-validate to avoid Time.new being too lax
 

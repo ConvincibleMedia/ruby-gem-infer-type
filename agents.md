@@ -1,1 +1,0 @@
-Always start by reading readme.md to understand the nature and purpose of this codebase.

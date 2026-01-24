@@ -18,11 +18,8 @@ module InferType
 			>x.freeze
 
 			def parse(str)
-				candidate = str.strip
-				return failure if candidate.empty?
-				
 				# Looks like a Date
-				return failure unless match = candidate.match(DATE_FORMAT)
+				return failure unless match = str.match(DATE_FORMAT)
 
 				# Pre-validate to avoid Date.new being too lax
 

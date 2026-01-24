@@ -76,6 +76,16 @@ InferType.deregister(IntegerParser)
 
 Parsers may expose settings that let you modify how they parse. These are the settings available for built-in parsers (showing their defaults):
 
+### Global
+
+InferType has one global setting:
+
+```ruby
+STRIP = true
+```
+
+This controls whether inputs are stripped before parsing is attempted. It's `true` by default and we recommend you leave it that way. All the built-in parsers assume that they will receive a stripped string. As soon as you feel the need to strip within any parser, you probably ought to turn it on globally, as it will be too unpredictable if some parsers strip and others don't.
+
 ### Integer
 
 ```ruby

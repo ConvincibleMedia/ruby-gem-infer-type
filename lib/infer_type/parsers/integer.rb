@@ -14,11 +14,8 @@ module InferType
 			INTEGER_REGEX = /\A-?\d+\z/
 
 			def parse(str)
-				candidate = str.strip
-				return failure if candidate.empty?
-
 				# Prepare the candidate for parsing
-				candidate = clean(candidate)
+				candidate = clean(str)
 
 				# Should now match integer format
 				return failure unless !candidate.match(INTEGER_REGEX).nil?
@@ -37,7 +34,7 @@ module InferType
 			private
 
 			def clean(str)
-				clean = str.dup.strip
+				clean = str.dup
 				return clean if clean.empty?
 
 				# Remove leading +

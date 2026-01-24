@@ -3,32 +3,28 @@
 require_relative '../spec_helper'
 
 RSpec.describe InferType::Parsers::TrueParser do
-	subject(:parser) { described_class.new }
-
 	it "parses 'true' case-insensitively in strict mode" do
-		result = parser.parse(" TRUE ")
+		result = InferType.parse(" TRUE ", TrueClass)
 
-		expect(result.parsed).to be(true)
-		expect(result.value).to eq(true)
+		expect(result).to eq(true)
 	end
 
 	it "rejects other truthy words in strict mode" do
-		expect(parser.parse("yes").parsed).to be(false)
+		expect(InferType.parse("yes", TrueClass)).to eq("yes")
 	end
 
 	it "accepts additional truthy words when STRICT is false" do
 		stub_const("#{described_class}::STRICT", false)
 
-		result = parser.parse("on")
+		result = InferType.parse("on", TrueClass)
 
-		expect(result.parsed).to be(true)
-		expect(result.value).to eq(true)
+		expect(result).to eq(true)
 	end
 
 	it "honours CASE_SENSITIVE when enabled" do
 		stub_const("#{described_class}::CASE_SENSITIVE", true)
 
-		expect(parser.parse("True").parsed).to be(false)
-		expect(parser.parse("true").parsed).to be(true)
+		expect(InferType.parse("True", TrueClass)).to eq("True")
+		expect(InferType.parse("true", TrueClass)).to eq(true)
 	end
 end

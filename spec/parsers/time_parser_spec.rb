@@ -3,78 +3,68 @@
 require_relative '../spec_helper'
 
 RSpec.describe InferType::Parsers::TimeParser do
-	subject(:parser) { described_class.new }
-
 	it "parses ISO8601 datetime strings with T separator" do
-		result = parser.parse("2024-03-15T12:30:45")
+		result = InferType.parse("2024-03-15T12:30:45", Time)
 
-		expect(result.parsed).to be(true)
-		expect(result.value).to eq(Time.new(2024, 3, 15, 12, 30, 45, "+00:00"))
-		expect(result.value.utc_offset).to eq(0)
+		expect(result).to eq(Time.new(2024, 3, 15, 12, 30, 45, "+00:00"))
+		expect(result.utc_offset).to eq(0)
 	end
 
 	it "parses datetime strings with space separator and offset" do
-		result = parser.parse("2024-03-15 12:30:00+02:00")
+		result = InferType.parse("2024-03-15 12:30:00+02:00", Time)
 
-		expect(result.parsed).to be(true)
-		expect(result.value).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+02:00"))
-		expect(result.value.utc_offset).to eq(7200)
+		expect(result).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+02:00"))
+		expect(result.utc_offset).to eq(7200)
 	end
 
 	it "parses offsets without colon" do
-		result = parser.parse("2024-03-15T12:30+0200")
+		result = InferType.parse("2024-03-15T12:30+0200", Time)
 
-		expect(result.parsed).to be(true)
-		expect(result.value).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+02:00"))
-		expect(result.value.utc_offset).to eq(7200)
+		expect(result).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+02:00"))
+		expect(result.utc_offset).to eq(7200)
 	end
 
 	it "parses Zulu or UTC suffixes as UTC" do
-		result = parser.parse("2024-03-15T12:30:00Z")
+		result = InferType.parse("2024-03-15T12:30:00Z", Time)
 
-		expect(result.parsed).to be(true)
-		expect(result.value).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+00:00"))
+		expect(result).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+00:00"))
 	end
 
 	it "parses sub-second precision with dot or comma separators" do
-		nano_result = parser.parse("2024-03-15T12:30:45.123456789+00:00")
+		nano_result = InferType.parse("2024-03-15T12:30:45.123456789+00:00", Time)
 
-		expect(nano_result.parsed).to be(true)
-		expect(nano_result.value.nsec).to eq(123_456_789)
+		expect(nano_result.nsec).to eq(123_456_789)
 
-		comma_result = parser.parse("2024-03-15T12:30:45,5Z")
+		comma_result = InferType.parse("2024-03-15T12:30:45,5Z", Time)
 
-		expect(comma_result.parsed).to be(true)
-		expect(comma_result.value.subsec).to be_within(1e-9).of(0.5)
+		expect(comma_result.subsec).to be_within(1e-9).of(0.5)
 	end
 
 	it "trims surrounding whitespace and accepts UTC suffix" do
-		result = parser.parse("\n2024-03-15 12:30 UTC\t")
+		result = InferType.parse("\n2024-03-15 12:30 UTC\t", Time)
 
-		expect(result.parsed).to be(true)
-		expect(result.value).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+00:00"))
+		expect(result).to eq(Time.new(2024, 3, 15, 12, 30, 0, "+00:00"))
 	end
 
 	it "falls back to local timezone when default UTC is disabled and no offset is provided" do
 		stub_const("InferType::Parsers::TimeParser::DEFAULT_UTC", false)
 		expected_offset = Time.new(2024, 3, 15, 12, 30).utc_offset
 
-		result = parser.parse("2024-03-15T12:30:00")
+		result = InferType.parse("2024-03-15T12:30:00", Time)
 
-		expect(result.parsed).to be(true)
-		expect(result.value.utc_offset).to eq(expected_offset)
+		expect(result.utc_offset).to eq(expected_offset)
 	end
 
 	it "rejects strings missing time information" do
-		expect(parser.parse("2024-03-15").parsed).to be(false)
+		expect(InferType.parse("2024-03-15", Time)).to eq("2024-03-15")
 	end
 
 	it "rejects strings with invalid month or day" do
-		expect(parser.parse("2024-13-01T00:00").parsed).to be(false)
+		expect(InferType.parse("2024-13-01T00:00", Time)).to eq("2024-13-01T00:00")
 	end
 
 	it "rejects strings with invalid hour" do
-		expect(parser.parse("2024-03-15T24:00").parsed).to be(false)
+		expect(InferType.parse("2024-03-15T24:00", Time)).to eq("2024-03-15T24:00")
 	end
 
 	it "rejects offsets beyond limits or with missing digits" do
@@ -85,7 +75,7 @@ RSpec.describe InferType::Parsers::TimeParser do
 			"2024-03-15T12:30+2400",
 			"2024-03-15T12:30-12:99"
 		].each do |input|
-			expect(parser.parse(input).parsed).to be(false)
+			expect(InferType.parse(input, Time)).to eq(input)
 		end
 	end
 
@@ -106,8 +96,8 @@ RSpec.describe InferType::Parsers::TimeParser do
 
 		bad_inputs.each do |input|
 			expect do
-				result = parser.parse(input)
-				expect(result.parsed).to be(false), "expected '#{input}' to be rejected"
+				result = InferType.parse(input, Time)
+				expect(result).to eq(input), "expected '#{input}' to be rejected"
 			end.not_to raise_error
 		end
 	end

@@ -18,6 +18,9 @@ module InferType
 			str = _input.dup
 			str = str.strip if STRIP
 
+			# Empty input immediately returned
+			return _input if str.empty?
+
 			# Select appropriate parsers
 			parsers = select_parsers(allowed_types)
 

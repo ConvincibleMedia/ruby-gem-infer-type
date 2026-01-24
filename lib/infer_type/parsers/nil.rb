@@ -14,9 +14,8 @@ module InferType
 			CASE_SENSITIVE = false
 
 			def parse(str)
-				candidate = str.strip
+				candidate = str
 				candidate = candidate.downcase if !CASE_SENSITIVE
-				return failure if candidate.empty?
 
 				if STRICT
 					return success(nil) if candidate == NIL_STRINGS.first
