@@ -13,24 +13,33 @@ module InferType
 	module Parsers
 	end
 
-	# Autoload paths for built-in parsers, including optional ones.
-	PARSER_AUTOLOAD_PATHS = {
-		IntegerParser: File.join(__dir__, "infer_type/parsers/integer"),
-		FloatParser: File.join(__dir__, "infer_type/parsers/float"),
-		TrueParser: File.join(__dir__, "infer_type/parsers/true"),
-		FalseParser: File.join(__dir__, "infer_type/parsers/false"),
-		NilParser: File.join(__dir__, "infer_type/parsers/nil"),
-		DateParser: File.join(__dir__, "infer_type/parsers/date"),
-		TimeParser: File.join(__dir__, "infer_type/parsers/time"),
-		HashParser: File.join(__dir__, "infer_type/parsers/hash"),
-		ArrayParser: File.join(__dir__, "infer_type/parsers/array")
+	# Built-in parser definitions, including optional ones.
+	PARSER_DEFINITIONS = {
+		IntegerParser: { path: File.join(__dir__, "infer_type/parsers/integer"), type: Integer, default: true },
+		FloatParser: { path: File.join(__dir__, "infer_type/parsers/float"), type: Float, default: true },
+		TrueParser: { path: File.join(__dir__, "infer_type/parsers/true"), type: TrueClass, default: true },
+		FalseParser: { path: File.join(__dir__, "infer_type/parsers/false"), type: FalseClass, default: true },
+		NilParser: { path: File.join(__dir__, "infer_type/parsers/nil"), type: NilClass, default: true },
+		DateParser: { path: File.join(__dir__, "infer_type/parsers/date"), type: Date, default: true },
+		TimeParser: { path: File.join(__dir__, "infer_type/parsers/time"), type: Time, default: true },
+		HashParser: { path: File.join(__dir__, "infer_type/parsers/hash"), type: Hash, default: false },
+		ArrayParser: { path: File.join(__dir__, "infer_type/parsers/array"), type: Array, default: false }
 	}.freeze
+
+	# Register autoloads up front so parser constants load when referenced.
+	PARSER_DEFINITIONS.each do |constant, definition|
+		next if Parsers.const_defined?(constant, false)
+		next if Parsers.autoload?(constant)
+
+		Parsers.autoload(constant, definition[:path])
+	end
 
 	class << self
 
 		# Primary method to parse a string into a type
 		def parse(_input, *allowed_types)
-			raise ArgumentError, "Can only parse Strings" unless _input.is_a?(String)
+			# Immediate return if input is not a String
+			return _input unless _input.is_a?(String)
 
 			# Prepare the string
 			str = _input.dup
@@ -78,39 +87,25 @@ module InferType
 		alias unprioritize deprioritise
 
 		private
-
-		# Sets up autoloads and lazy registration for built-in parsers.
-		def initialise_builtin_parsers
-			register_parser_autoloads
-			register_default_parsers
-		end
-
-		# Registers autoloads so parser constants load their files on first use.
-		def register_parser_autoloads
-			PARSER_AUTOLOAD_PATHS.each do |constant, path|
-				next if Parsers.const_defined?(constant, false)
-				next if Parsers.autoload?(constant)
-
-				Parsers.autoload(constant, path)
-			end
+		# Builds the registry with default parsers registered lazily.
+		def build_registry
+			registry = InferType::Registry.new
+			register_default_parsers(registry)
+			registry
 		end
 
 		# Registers default parsers lazily so they load only when used.
-		def register_default_parsers
-			registry.register_lazy_parser(type: Integer) { Parsers::IntegerParser }
-			registry.register_lazy_parser(type: Float) { Parsers::FloatParser }
-			registry.register_lazy_parser(type: TrueClass) { Parsers::TrueParser }
-			registry.register_lazy_parser(type: FalseClass) { Parsers::FalseParser }
-			registry.register_lazy_parser(type: NilClass) { Parsers::NilParser }
-			registry.register_lazy_parser(type: Date) { Parsers::DateParser }
-			registry.register_lazy_parser(type: Time) { Parsers::TimeParser }
-			registry.register_lazy_parser(type: Hash) { Parsers::HashParser }
-			registry.register_lazy_parser(type: Array) { Parsers::ArrayParser }
+		def register_default_parsers(registry)
+			PARSER_DEFINITIONS.each do |constant, definition|
+				next unless definition[:default]
+
+				registry.register_lazy_parser(type: definition[:type]) { Parsers.const_get(constant) }
+			end
 		end
 
 		# Returns the registry instance backing InferType.
 		def registry
-			@registry ||= InferType::Registry.new
+			@registry ||= build_registry
 		end
 
 		# Select parsers in priority order
@@ -136,6 +131,3 @@ module InferType
 		end
 	end
 end
-
-InferType.send(:initialise_builtin_parsers)
-

@@ -7,6 +7,7 @@ A simple and lightweight Ruby utility that **converts strings into their most ap
 * You can define custom parsers to detect other types of any kind
 * Priority order of detection is configurable
 
+If the input could not be parsed to another type, or the input isn't a string, it is simply returned.
 
 ## Basic usage
 
@@ -19,6 +20,9 @@ InferType.parse("1.5")
 
 InferType.parse("hello")
 # => "hello" # remains a string as no other type detected
+
+InferType.parse(3.0)
+# => 3.0 # returned as input not a string
 ```
 
 

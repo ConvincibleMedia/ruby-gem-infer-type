@@ -4,8 +4,8 @@ require_relative 'spec_helper'
 
 RSpec.describe InferType do
 	describe ".parse" do
-		it "raises ArgumentError when input is not a String" do
-			expect { described_class.parse(123) }.to raise_error(ArgumentError, "Can only parse Strings")
+		it "returns value directly when input is not a String" do
+			expect(described_class.parse(123)).to eq(123)
 		end
 
 		it "parses trimmed strings without mutating the original input" do
@@ -27,6 +27,15 @@ RSpec.describe InferType do
 
 			expect(result).to equal(input)
 			expect(result).to eq("  not-a-match  ")
+		end
+
+		# Ensures optional Hash/Array parsers are not used unless explicitly registered.
+		it "does not parse hash or array literals before their parsers are registered" do
+			hash_input = '{foo: 1, "bar" => 2}'
+			array_input = '[1, 2, 3]'
+
+			expect(described_class.parse(hash_input)).to equal(hash_input)
+			expect(described_class.parse(array_input)).to equal(array_input)
 		end
 
 		it "respects allowed type priority" do
